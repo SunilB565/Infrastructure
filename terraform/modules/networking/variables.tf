@@ -18,16 +18,31 @@ variable "public_subnet_cidrs" {
   type = list(string)
 }
 
+variable "existing_vpc_id" {
+  type    = string
+  default = ""
+}
+
+variable "public_subnet_ids" {
+  type    = list(string)
+  default = []
+}
+
+variable "private_subnet_ids" {
+  type    = list(string)
+  default = []
+}
+
 output "vpc_id" {
-  value = aws_vpc.main.id
+  value = local.vpc_id
 }
 
 output "private_subnet_ids" {
-  value = aws_subnet.private[*].id
+  value = local.effective_private_ids
 }
 
 output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
+  value = local.effective_public_ids
 }
 
 output "alb_security_group_id" {

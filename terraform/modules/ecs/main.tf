@@ -1,6 +1,5 @@
 # ECS Task Definition
 locals {
-  alb_name = "${substr(var.app_name, 0, 10)}-${substr(var.service_name, 0, 10)}-alb"
   environment_variables = [
     for name, value in var.container_environment : {
       name  = name
@@ -13,6 +12,8 @@ locals {
       valueFrom = value_from
     }
   ]
+  effective_execution_role_arn = var.execution_role_arn != null && var.execution_role_arn != "" ? var.execution_role_arn : aws_iam_role.ecs_task_execution[0].arn
+  effective_task_role_arn      = var.task_role_arn != null && var.task_role_arn != "" ? var.task_role_arn : aws_iam_role.ecs_task[0].arn
 }
 
 resource "aws_ecs_task_definition" "service" {
@@ -21,8 +22,8 @@ resource "aws_ecs_task_definition" "service" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.task_cpu
   memory                   = var.task_memory
-  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  task_role_arn            = aws_iam_role.ecs_task.arn
+  execution_role_arn       = local.effective_execution_role_arn
+  task_role_arn            = local.effective_task_role_arn
 
   container_definitions = jsonencode([{
     name      = var.service_name
@@ -93,7 +94,8 @@ resource "aws_cloudwatch_log_group" "service" {
 
 # IAM Roles
 resource "aws_iam_role" "ecs_task_execution" {
-  name = "${var.service_name}-execution-role"
+  count = var.execution_role_arn != null && var.execution_role_arn != "" ? 0 : 1
+  name  = "${var.service_name}-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -108,12 +110,14 @@ resource "aws_iam_role" "ecs_task_execution" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
-  role       = aws_iam_role.ecs_task_execution.name
+  count      = var.execution_role_arn != null && var.execution_role_arn != "" ? 0 : 1
+  role       = aws_iam_role.ecs_task_execution[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role" "ecs_task" {
-  name = "${var.service_name}-task-role"
+  count = var.task_role_arn != null && var.task_role_arn != "" ? 0 : 1
+  name  = "${var.service_name}-task-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

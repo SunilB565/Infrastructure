@@ -50,6 +50,16 @@ variable "desired_count" {
   type = number
 }
 
+variable "execution_role_arn" {
+  type    = string
+  default = null
+}
+
+variable "task_role_arn" {
+  type    = string
+  default = null
+}
+
 variable "container_environment" {
   type    = map(string)
   default = {}

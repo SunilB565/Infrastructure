@@ -7,6 +7,9 @@ module "networking" {
   vpc_cidr             = var.vpc_cidr
   private_subnet_cidrs = var.private_subnet_cidrs
   public_subnet_cidrs  = var.public_subnet_cidrs
+  existing_vpc_id      = var.existing_vpc_id
+  public_subnet_ids    = var.public_subnet_ids
+  private_subnet_ids   = var.private_subnet_ids
 }
 
 # ECR Repositories
@@ -67,6 +70,8 @@ module "ecs_patient_service" {
   task_cpu           = var.ecs_task_cpu
   task_memory        = var.ecs_task_memory
   desired_count      = var.ecs_service_desired_count
+  execution_role_arn = var.shared_execution_role_arn
+  task_role_arn      = var.shared_execution_role_arn
   container_environment = {
     NODE_ENV     = "production"
     PORT         = "3001"
@@ -105,6 +110,8 @@ module "ecs_appointment_service" {
   task_cpu           = var.ecs_task_cpu
   task_memory        = var.ecs_task_memory
   desired_count      = var.ecs_service_desired_count
+  execution_role_arn = var.shared_execution_role_arn
+  task_role_arn      = var.shared_execution_role_arn
   container_environment = {
     NODE_ENV     = "production"
     PORT         = "3002"
@@ -143,6 +150,8 @@ module "ecs_patient_portal" {
   task_cpu           = var.ecs_task_cpu
   task_memory        = var.ecs_task_memory
   desired_count      = var.ecs_service_desired_count
+  execution_role_arn = var.shared_execution_role_arn
+  task_role_arn      = var.shared_execution_role_arn
   container_environment = {
     NODE_ENV = "production"
   }

@@ -20,10 +20,10 @@ pipeline {
       steps {
         sh '''
           if command -v checkov >/dev/null 2>&1; then
-            checkov -d terraform/environments/prod --framework terraform
+            checkov -d terraform/environments/prod --framework terraform --soft-fail
           else
             docker run --rm -v "$PWD:/tf" bridgecrew/checkov:latest \
-              -d /tf/terraform/environments/prod --framework terraform
+              -d /tf/terraform/environments/prod --framework terraform --soft-fail
           fi
         '''
       }

@@ -42,6 +42,12 @@ pipeline {
         sh 'terraform -chdir=terraform/environments/prod apply -auto-approve tfplan'
       }
     }
+    stage('Force Destroy (Manual)') {
+      steps {
+        input 'Force destroy ALL infrastructure?'
+        sh 'terraform -chdir=terraform/environments/prod destroy -auto-approve -refresh=false -lock=false'
+      }
+    }
   }
   post {
     failure {
